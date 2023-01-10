@@ -57,10 +57,13 @@ class FileFrame(tk.Frame):
         ## Tkinter widgets ##
         # List runs and its scrollbars #
         self.label_list_runs = tk.Label(self, text = 'List run ', font = 'CMUBright')
+        self.scrollbar_runs_x = tk.Scrollbar(self, orient="horizontal")
         self.scrollbar_runs_y = tk.Scrollbar(self)
-        self.list_runs = tk.Listbox(self ,yscrollcommand = self.scrollbar_runs_y.set, font = 'CMUBright', activestyle = 'dotbox', height = 15, width = 25, selectbackground = 'LightSkyblue1', selectforeground = 'black', exportselection=False, selectmode='single') 
+        self.list_runs = tk.Listbox(self ,xscrollcommand=self.scrollbar_runs_x.set,yscrollcommand = self.scrollbar_runs_y.set, font = 'CMUBright', activestyle = 'dotbox', height = 15, width = 25, selectbackground = 'LightSkyblue1', selectforeground = 'black', exportselection=False, selectmode='single') 
         self.label_list_runs.grid(row = 1, column = 1, sticky='w')
         self.list_runs.grid(row = 2, column = 1, rowspan = 11, sticky = 'wn') 
+        self.scrollbar_runs_x.config( command = self.list_runs.xview )
+        self.scrollbar_runs_x.grid( row = 13, column = 1, sticky = 'wne')
         self.scrollbar_runs_y.config( command = self.list_runs.yview )
         self.scrollbar_runs_y.grid( row = 2, rowspan = 11, column = 2, sticky = 'nsw', padx=(0,20))
         self.list_runs.bind('<Enter>', give_focus)
