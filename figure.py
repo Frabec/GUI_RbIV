@@ -1,8 +1,16 @@
 from matplotlib.pyplot import show
 import numpy as np
+import sys
 from matplotlib.colors import ListedColormap
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.widgets import RectangleSelector
+
+passerelle_path = 'Z:/'
+sys.path.append(passerelle_path + 'Chloe/OpenPicture/')
+from parula_python import make_colormap_parula
+
+parula_map = make_colormap_parula()
+
 GREINER_CM = [
     [1.0000, 1.0000, 1.0000, 1.0000],
     [0.9474, 0.9474, 1.0000, 1.0000],
@@ -158,7 +166,7 @@ class Image_Plot:
         self.canvas1 = FigureCanvasTkAgg(self.f1, self.parent)
         self.a = self.f1.add_subplot(111)
         self.canvas2 = FigureCanvasTkAgg(self.f2, self.parent)
-        self.im_plot=self.a.imshow(np.random.rand(104,140), cmap=greiner, origin="lower")
+        self.im_plot=self.a.imshow(np.random.rand(104,140), cmap=parula_map, origin="lower")
         self.cb=self.f1.colorbar(self.im_plot, ax=self.a, shrink=0.9, orientation='horizontal')
         self.line_x=self.a.axvline(x=10, color='black', linestyle='-', linewidth=0.75)
         self.line_y=self.a.axhline(y=10, color='black', linestyle='-', linewidth=0.75)

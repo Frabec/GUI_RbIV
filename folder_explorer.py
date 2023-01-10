@@ -4,7 +4,7 @@ from tkinter.constants import S
 import re
 import time 
 
-regex_runs=re.compile("^\d{6}#") #Regex to identify run folders
+regex_runs=re.compile("^\d{6}_") #Regex to identify run folders
 #returns list of names of sub-folders of "path" ordered by modification date
 def list_folders(path):
     list_of_folders=[]
@@ -32,16 +32,27 @@ class FolderExplorer:
     def find_last_day(self, path, depth=0):
         if depth==3:
             #We set the day
-            normalized_path=os.path.normpath(path)
-            day=map(int, normalized_path.split(os.path.sep)[-3:])
-            self.day=datetime.date(*list(day))
-            return path
-        try :
-            os.path.isdir(path)
-        except FileNotFoundError :
-            print("Wrong passerelle path")
-        following=max([folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder))])
-        return self.find_last_day(os.path.join(path, following), depth=depth+1)
+            self.day=datetime.datetime.strptime(os.path.basename(path), "%d%b%Y")
+            return os.path.join(path, "Pictures", "RAW")
+        elif depth==2:
+            #Folders of type ddbbbYYYY e.g. 01Jan2000
+            following=max([datetime.datetime.strptime(folder, "%d%b%Y") for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder))])
+            following=datetime.datetime.strftime(following, "%d%b%Y")
+            return self.find_last_day(os.path.join(path, following), depth=depth+1)
+        elif depth==1:
+            #Folder of type bbbYYYY e.g Jan2000
+            following=max([datetime.datetime.strptime(folder, "%b%Y") for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder))])
+            following=datetime.datetime.strftime(following, "%b%Y")
+            return self.find_last_day(os.path.join(path, following), depth=depth+1)
+        elif depth==0:
+            #Folder of type YYYY e.g 2000 but be careful because plenty other folders
+            try :
+                os.path.isdir(path)
+            except FileNotFoundError :
+                print("Wrong passerelle path")
+            following=max([folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder)) and re.match("\d{4}", folder) is not None])
+            return self.find_last_day(os.path.join(path, following), depth=depth+1)
+            
     def get_path_to_image(self, run, image):
         return os.path.join(self.day_path, run, image)
     #Poll day directory get list of runs and put it in the runs listbox
@@ -78,7 +89,7 @@ class FolderExplorer:
         image=os.path.basename(os.path.normpath(path))
         images_array=list(self.fileFrame.list_images.get(0, 'end'))
         images_array.append(image)
-        images_array.sort(key=lambda x: int(x.split("#")[0]), reverse=True)#we get the sorted array
+        images_array.sort(key=lambda x: int(x.split("_")[0]), reverse=True)#we get the sorted array
         index_of_new_image=images_array.index(image) #we get the index of the new image
         self.fileFrame.list_images.insert(index_of_new_image, image) #we instert it in the ListBox
 

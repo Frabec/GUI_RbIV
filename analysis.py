@@ -5,10 +5,13 @@ import os
 import scipy.signal
 from scipy.optimize import curve_fit
 import rb
+import tifffile as tiff
 
 def read_image(path):
-    try:  
-        img=cv.imread(path, cv.IMREAD_UNCHANGED) #we load the images
+    try: 
+        img=np.array(tiff.imread(path),dtype=np.float32)
+        if len(img.shape)==3:
+            img=img[0]
     except cv.error as e:
         # inspect error object
         print(e)
@@ -61,7 +64,11 @@ class Analysis:
         return np.nansum(self.absorption_picture[self.ROI])*pixel_size**2/rb.sigma0
     def set_camera_and_absorption_picure(self):
         threshold=0.02
+        #We set the camera_name
+        self.camera_name=os.path.basename(self.folder_path).split("_")[2]
         dict_pictures=self.open_picture()
+        for image in dict_pictures.values():
+            print(image.shape)
         transmission=(dict_pictures["atoms"]-dict_pictures["background"])/(dict_pictures["no atoms"]-dict_pictures["background"])
         burned_pixels=transmission <=0
         transmission[burned_pixels] = float("nan")
@@ -71,18 +78,20 @@ class Analysis:
         self.absorption_picture=od
         return od
     def open_picture(self):
-        print(self.background)
-        #The suffixes we have to add to the folder name to obtain the corresponding pictures 
-        with_atoms_suffix="_With.png"
-        no_atoms_suffix="_NoAt.png"
-        background_suffix="_Bgd.png"
-        for file in os.listdir(self.folder_path):
-            if file.endswith(with_atoms_suffix):
-                camera_name=file[:-len(with_atoms_suffix)] #we get the camera name from the image file
-        img_with_atoms=read_image(os.path.join(self.folder_path, camera_name+with_atoms_suffix)) #we load the images
+        #The suffixes we have to add to the folder name to obtain the corresponding pictures
+        print(self.camera_name)
+        if self.camera_name=="Princeton":
+            with_atoms_name="frames_0001.tiff"
+            no_atoms_name="frames_0002.tiff"
+            background_name="frames_0003.tiff"
+        else:
+            with_atoms_name="frames_0000.tiff"
+            no_atoms_name="frames_0001.tiff"
+            background_name="frames_0002.tiff"
+        img_with_atoms=read_image(os.path.join(self.folder_path, with_atoms_name)) #we load the images
         
                     
-        img_no_atoms=read_image(os.path.join(self.folder_path, camera_name+no_atoms_suffix))
+        img_no_atoms=read_image(os.path.join(self.folder_path, no_atoms_name))
         ## Remove the offest
         if  (not self.gauss_fit) and (self.background is not None) and (self.background_correction):
             ratio = np.nanmean(img_no_atoms[self.background]
@@ -90,8 +99,7 @@ class Analysis:
             img_no_atoms = img_no_atoms/ratio
             print("Correction ratio is {}".format(ratio))
         ##
-        img_background=read_image(os.path.join(self.folder_path, camera_name+background_suffix))
-        self.camera_name=camera_name
+        img_background=read_image(os.path.join(self.folder_path, background_name))
         return {"atoms": img_with_atoms, 'no atoms': img_no_atoms, 'background':img_background}
 
     def set_cursor_and_cbar(self, center=None, offset=0):

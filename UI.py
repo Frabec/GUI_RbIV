@@ -17,7 +17,7 @@ import folder_explorer
 from frames import FileFrame, PlotFrame, give_focus
 import config
 import analysis
-import os
+import os,sys
 import time
 
 class MainApplication(tk.Frame, folder_explorer.FolderExplorer):
@@ -29,8 +29,15 @@ class MainApplication(tk.Frame, folder_explorer.FolderExplorer):
         self.day=day
         if self.day is None:
             self.day_path = self.find_last_day(config.config_parser["filesystem"]["passerelle_path"]) #finds the path to last day where images where recorded
+            print(self.day_path)
         else :
-            self.day_path = config.config_parser["filesystem"]["passerelle_path"] +os.path.sep+self.day.__str__().replace("-", os.path.sep)
+            day_new=day.strftime("%d%b%Y")
+            year=day_new[5:]
+            month=day_new[2:5]+year
+            browse_day=day_new[5:]+month
+            print(config.config_parser["filesystem"]["passerelle_path"] +year+os.path.sep+month+os.path.sep+day_new+os.path.sep+'Pictures'+os.path.sep+'RAW')
+            #self.day_path = config.config_parser["filesystem"]["passerelle_path"] +os.path.sep+self.day.__str__().replace("-", os.path.sep)
+            self.day_path=config.config_parser["filesystem"]["passerelle_path"] +year+os.path.sep+month+os.path.sep+day_new+os.path.sep+'Pictures'+os.path.sep+'RAW'
         ## Frames ##
         self.fileFrame=FileFrame(self.parent,self)
         self.fileFrame.grid(column= 1, row=2)
@@ -163,7 +170,8 @@ class MainApplication(tk.Frame, folder_explorer.FolderExplorer):
         splitted=selected_path.split(os.path.sep)
         print(splitted)
         try: 
-            day=datetime.date(int(splitted[-3]),int(splitted[-2]), int(splitted[-1]))
+            # day=datetime.date(int(splitted[-3]),int(splitted[-2]), int(splitted[-1]))
+            day = datetime.datetime.strptime(splitted[-1],'%d%b%Y').date()
         except:
             tk.messagebox.showerror(title="Error",message="{}\nis not a valid run path".format(selected_path))
             return
