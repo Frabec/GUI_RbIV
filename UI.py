@@ -136,10 +136,10 @@ class MainApplication(tk.Frame, folder_explorer.FolderExplorer):
 
     def on_set_view_as_ROI(self):
         xlims, ylims=self.plotFrame.image_plot.get_lims()
-        self.plotFrame.var_xmin.set(int(xlims[0]))
-        self.plotFrame.var_xmax.set(int(xlims[1]))
-        self.plotFrame.var_ymin.set(int(ylims[0]))
-        self.plotFrame.var_ymax.set(int(ylims[1]))
+        self.plotFrame.var_xmin.set(int(min(xlims[0],xlims[1])))
+        self.plotFrame.var_xmax.set(int(max(xlims[0],xlims[1])))
+        self.plotFrame.var_ymin.set(int(min(ylims[0],ylims[1])))
+        self.plotFrame.var_ymax.set(int(max(ylims[0],ylims[1])))
 
     def on_new_cursor(self,event):
         self.plotFrame.var_vx.set(event.x)

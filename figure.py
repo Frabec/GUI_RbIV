@@ -121,7 +121,7 @@ class Image_Plot:
     def plot_im(self,im, cursor, cbar_bounds, fitted_picture):
         im_shape=im.shape
         self.im_plot.set_data(im)
-        self.im_plot.set_extent([0,im_shape[1],0,im_shape[0]])
+        self.im_plot.set_extent([0,im_shape[1],im_shape[0],0])
         if cbar_bounds is not None : 
             self.im_plot.set_clim(cbar_bounds[0], cbar_bounds[1])
         self.line_x.set_xdata(cursor[0])
