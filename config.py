@@ -8,7 +8,7 @@ config_parser = SafeConfigParser()
 config_parser.read(configfile)
 if os.name=="nt": #means this program is running on windows
     if os.getlogin()=="g.chauveau":
-        config_parser.set("filesystem", "passerelle_path", config_parser["filesystem"]["passerelle_path_guillaume"])
+        config_parser.set("filesystem", "passerelle_path", config_parser["filesystem"]["passerelle_path_windows"])
     else:
         config_parser.set("filesystem", "passerelle_path", config_parser["filesystem"]["passerelle_path_windows"])
 elif os.name=='posix': #means this program is running on linux
