@@ -94,7 +94,7 @@ class FileFrame(tk.Frame):
         check_watch_camera.grid(row=8, column = 6, columnspan=2, sticky= 'w')
         button_refresh = HoverButton(self, text = 'Refresh', width = 11, activebackground = 'LightSkyblue1', command = self.mainapp.analyze_one_shot)
         button_refresh.grid(row=3, column = 6, columnspan=2, sticky= 'ne')
-        button_last = HoverButton(self, text = 'Last', width = 11, activebackground = 'LightSkyblue1', command = self.mainapp.on_last_image)
+        button_last = HoverButton(self, text = 'Delete', width = 11, activebackground = 'LightSkyblue1', command = self.mainapp.delete_shot)
         button_last.grid(row=4, column = 6, columnspan=2, sticky= 'ne')
         button_browselist = HoverButton(self, text = 'Browse list', width = 11, activebackground = 'LightSkyblue1', command = self.mainapp.on_browse)
         button_browselist.grid(row=5, column = 6, columnspan=2, sticky= 'ne')

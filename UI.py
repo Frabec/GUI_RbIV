@@ -1,15 +1,19 @@
+#!/usr/bin/python
+import os
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 import configparser
 import tkinter as tk 
 from scipy.constants import c
 import matplotlib
 
 
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 import scipy.constants as c
 # from backend_tkagg2 import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 from matplotlib.figure import Figure
 import tkinter as tk
+from tkinter.messagebox import askyesno
 import datetime
 #local imports
 from backend import Backend
@@ -17,7 +21,7 @@ import folder_explorer
 from frames import FileFrame, PlotFrame, give_focus
 import config
 import analysis
-import os,sys
+import sys
 import time
 
 class MainApplication(tk.Frame, folder_explorer.FolderExplorer):
@@ -159,11 +163,19 @@ class MainApplication(tk.Frame, folder_explorer.FolderExplorer):
         print("on back to default")
     
     def analyze_one_shot(self):
-        print("analyze one shot")
+        print("analyze  shot")
 
-    def on_last_image(self):
-        print("on last image")
-
+    def delete_shot(self):
+        if len(self.fileFrame.list_images.curselection())==0 or len(self.fileFrame.list_runs.curselection())==0:
+            return
+        image_name=self.fileFrame.list_images.get(self.fileFrame.list_images.curselection()[0])
+        run_name=self.fileFrame.list_runs.get(self.fileFrame.list_runs.curselection()[0])
+        timestamp=image_name[:6]
+        answer = askyesno("Delete shot {}".format(timestamp), "Are you sure you want to delete this shot ?")
+        if not answer:
+            return
+        self.remove_image_from_disk(run_name,image_name)
+        
     def on_browse(self):
         selected_path=tk.filedialog.askdirectory(initialdir=config.config_parser["filesystem"]["passerelle_path"], title="Select run", mustexist=True )
         selected_path=os.path.normpath(selected_path)
@@ -214,4 +226,4 @@ def new_window(day=None):
     root.mainloop()
 if __name__ == "__main__":
     new_window()
-        
+    

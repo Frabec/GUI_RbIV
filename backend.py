@@ -18,16 +18,18 @@ class Watchdog_runs(Observer, FileSystemEventHandler):
     # def on_any_event(self, event):
     #     print(event)
     def on_created(self, event):
+        if not self.is_alive():
+            return
         if event.is_directory:
             if self.last_created_path is None:
-                time.sleep(1.5) #Wait until Camera program has time to save the 3 pictures, if we don't wait the program crashes
+                # time.sleep(1.5) #Wait until Camera program has time to save the 3 pictures, if we don't wait the program crashes
                 self.backend.notify_runs(event, self.type)
                 self.last_created_path=event.src_path
             else: 
                 if event.src_path==self.last_created_path:
                     return
                 else: 
-                    time.sleep(1.5) #Wait until Camera program has time to save the 3 pictures, if we don't wait the program crashes
+                    # time.sleep(1.5) #Wait until Camera program has time to save the 3 pictures, if we don't wait the program crashes
                     self.backend.notify_runs(event, self.type)
                     self.last_created_path=event.src_path
 
@@ -36,10 +38,19 @@ class Watchdog_runs(Observer, FileSystemEventHandler):
     #     if event.is_directory:
     #         self.backend.notify_runs(event)
     def on_deleted(self, event):
-        self.backend.notify_runs(event, self.type)
+        if not self.is_alive():
+            return
+        #Check that indeed the file doesn't exist anymore
+        if not os.path.exists(event.src_path):
+            self.backend.notify_runs(event, self.type)
     def kill(self):
         self.stop()
-        self.join()
+        self.join(timeout=2)
+        if self.is_alive():
+            print("Impossible to join thread")
+            # raise Exception("Impossible to join thread")
+        else: 
+            print("Thread joined")
 
 class Backend:
     MONITOR_RUNS=0

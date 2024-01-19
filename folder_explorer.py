@@ -2,7 +2,8 @@ import datetime
 import os
 from tkinter.constants import S
 import re
-import time 
+import time
+import shutil
 
 regex_runs=re.compile("^\d{6}_") #Regex to identify run folders
 #returns list of names of sub-folders of "path" ordered by modification date
@@ -30,15 +31,13 @@ class FolderExplorer:
     
     #find last day where a run is present and returns the path
     def find_last_day(self, path, depth=0):
-        if depth==3:
-            #We set the day
-            self.day=datetime.datetime.strptime(os.path.basename(path), "%d%b%Y")
-            return os.path.join(path, "Pictures", "RAW")
-        elif depth==2:
+        if depth==2:
             #Folders of type ddbbbYYYY e.g. 01Jan2000
-            following=max([datetime.datetime.strptime(folder, "%d%b%Y") for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder))])
+            following=max([datetime.datetime.strptime(folder, "%d%b%Y") for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder,"Pictures","RAW"))])
             following=datetime.datetime.strftime(following, "%d%b%Y")
-            return self.find_last_day(os.path.join(path, following), depth=depth+1)
+            end_path=os.path.join(path, following)
+            self.day=datetime.datetime.strptime(os.path.basename(end_path), "%d%b%Y")
+            return os.path.join(end_path, "Pictures", "RAW")
         elif depth==1:
             #Folder of type bbbYYYY e.g Jan2000
             following=max([datetime.datetime.strptime(folder, "%b%Y") for folder in os.listdir(path) if os.path.isdir(os.path.join(path,folder))])
@@ -70,17 +69,24 @@ class FolderExplorer:
     def delete_run(self, run_path):
         run=os.path.basename(os.path.normpath(run_path))
         runs_array=self.fileFrame.list_runs.get(0,'end') # get list of runs
-        if run in runs_array:
-            index_of_run=runs_array.index(run) #get index of run
-        self.fileFrame.list_runs.delete(index_of_run)
+        runs_array_lc=[os.path.normcase(x) for x in runs_array]
+        if run in runs_array_lc:
+            index_of_run=runs_array_lc.index(run) #get index of run
+            self.fileFrame.list_runs.delete(index_of_run)
     
     #Deletes an image
     def delete_image(self, image_path):
         image=os.path.basename(os.path.normcase(image_path))
         images_array=self.fileFrame.list_images.get(0,'end')
-        if image in images_array:
-            index_of_image=images_array.index(image)
-        self.fileFrame.list_images.delete(index_of_image)
+        images_array_lc=[os.path.normcase(x) for x in images_array]
+        if image in images_array_lc:
+            index_of_image=images_array_lc.index(image)
+            if index_of_image==self.fileFrame.list_images.curselection()[0]:
+                if index_of_image==0:
+                    self.fileFrame.list_images.select_set(1)
+                else:
+                    self.fileFrame.list_images.select_set(index_of_image-1)    
+            self.fileFrame.list_images.delete(index_of_image)
 
     def add_new_run(self,path):
         self.fileFrame.list_runs.insert(0, os.path.basename(os.path.normpath(path)))
@@ -93,3 +99,5 @@ class FolderExplorer:
         index_of_new_image=images_array.index(image) #we get the index of the new image
         self.fileFrame.list_images.insert(index_of_new_image, image) #we instert it in the ListBox
 
+    def remove_image_from_disk(self, run, image):
+        shutil.rmtree(self.get_path_to_image(run,image))

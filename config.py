@@ -1,10 +1,10 @@
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 import os
 configfile="config.ini"
 
 
 
-config_parser = SafeConfigParser()
+config_parser = ConfigParser()
 config_parser.read(configfile)
 if os.name=="nt": #means this program is running on windows
     if os.getlogin()=="g.chauveau":
